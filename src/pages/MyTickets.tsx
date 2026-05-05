@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 
 interface Row {
   id: string;
@@ -30,6 +31,8 @@ export default function MyTickets() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [confirmIsWaitlist, setConfirmIsWaitlist] = useState(false);
 
   const load = async () => {
     if (!user) return;
@@ -48,13 +51,18 @@ export default function MyTickets() {
 
   useEffect(() => { load(); }, [user?.id]);
 
-  const cancel = async (rsvpId: string) => {
+  const doCancel = async (rsvpId: string) => {
     setCancellingId(rsvpId);
     const { error } = await supabase.rpc("cancel_rsvp", { _rsvp_id: rsvpId });
     setCancellingId(null);
     if (error) { toast.error(error.message); return; }
-    toast.success("RSVP cancelled");
+    toast.success(confirmIsWaitlist ? "Removed from waitlist" : "RSVP cancelled");
     load();
+  };
+
+  const requestCancel = (r: Row) => {
+    setConfirmIsWaitlist(r.status === "waitlisted");
+    setConfirmId(r.id);
   };
 
   const now = new Date();
@@ -111,7 +119,7 @@ export default function MyTickets() {
                   <TicketCard
                     key={r.id}
                     ticket={card}
-                    onCancel={() => cancel(r.id)}
+                    onCancel={() => requestCancel(r)}
                     cancelling={cancellingId === r.id}
                   />
                 );
@@ -128,6 +136,18 @@ export default function MyTickets() {
           </Tabs>
         )}
       </div>
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(o) => !o && setConfirmId(null)}
+        title={confirmIsWaitlist ? "Leave the waitlist?" : "Cancel your RSVP?"}
+        description={confirmIsWaitlist
+          ? "You can re-join later if a spot opens."
+          : "Your spot will be released and offered to the next waitlisted attendee."}
+        confirmLabel={confirmIsWaitlist ? "Leave waitlist" : "Cancel RSVP"}
+        cancelLabel="Keep it"
+        destructive
+        onConfirm={() => { const id = confirmId!; setConfirmId(null); doCancel(id); }}
+      />
     </div>
   );
 }
