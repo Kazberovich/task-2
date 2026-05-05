@@ -478,12 +478,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_host_invite: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          host_id: string
+          id: string
+          role: Database["public"]["Enums"]["host_member_role"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "host_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       can_check_in_event: {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
       cancel_rsvp: { Args: { _rsvp_id: string }; Returns: undefined }
       ensure_ticket_for_rsvp: { Args: { _rsvp_id: string }; Returns: string }
+      get_invite_preview: {
+        Args: { _token: string }
+        Returns: {
+          expires_at: string
+          host_id: string
+          host_name: string
+          host_slug: string
+          role: Database["public"]["Enums"]["host_member_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
