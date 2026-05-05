@@ -120,6 +120,39 @@ export default function HostDashboard() {
   };
 
   const openCreate = () => { setEditing(undefined); setFormOpen(true); };
+
+  const exportCsv = async (e: EventRow) => {
+    const { data } = await supabase
+      .from("rsvps")
+      .select("status, created_at, profiles:user_id(display_name, email), tickets(code, status), check_ins(checked_in_at, undone)")
+      .eq("event_id", e.id);
+    const rows = (data as any[]) ?? [];
+    const header = ["Name", "Email", "Status", "Ticket Code", "RSVP At", "Checked In At"];
+    const csv = [
+      header.join(","),
+      ...rows.map((r) => {
+        const t = r.tickets?.[0];
+        const c = (r.check_ins ?? []).find((x: any) => !x.undone);
+        return [
+          r.profiles?.display_name ?? "",
+          r.profiles?.email ?? "",
+          r.status,
+          t?.code ?? "",
+          r.created_at ?? "",
+          c?.checked_in_at ?? "",
+        ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
+      }),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${e.slug}-attendees.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV downloaded");
+  };
+
   const openEdit = (e: EventRow) => {
     setEditing({
       id: e.id, host_id: e.host_id, title: e.title, description: e.description,
