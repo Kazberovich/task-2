@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RequireAuth } from "@/components/auth/RequireAuth";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import Explore from "./pages/Explore";
 import EventDetail from "./pages/EventDetail";
 import HostPage from "./pages/HostPage";
@@ -27,6 +28,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ErrorBoundary>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route element={<AppLayout />}>
@@ -42,6 +44,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

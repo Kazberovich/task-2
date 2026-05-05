@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { FeedbackSection } from "@/components/events/FeedbackSection";
 import { GallerySection } from "@/components/events/GallerySection";
 import { ReportDialog } from "@/components/events/ReportDialog";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 
 interface EventRow {
   id: string;
@@ -38,6 +39,7 @@ export default function EventDetail() {
   const [goingCount, setGoingCount] = useState<number>(0);
   const [myRsvp, setMyRsvp] = useState<{ id: string; status: "confirmed" | "waitlisted" | "cancelled" } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
 
   const loadCounts = useCallback(async (eventId: string, userId?: string) => {
     const { count } = await supabase
@@ -140,7 +142,7 @@ export default function EventDetail() {
     await loadCounts(event.id, user.id);
   };
 
-  const handleCancel = async () => {
+  const doCancel = async () => {
     if (!myRsvp || !event) return;
     setSubmitting(true);
     const { error } = await supabase.rpc("cancel_rsvp", { _rsvp_id: myRsvp.id });
@@ -267,7 +269,7 @@ export default function EventDetail() {
               <div className="rounded-md bg-primary/10 p-3 text-center text-sm font-medium text-primary">
                 You're going 🎉
               </div>
-              <Button variant="outline" className="w-full" onClick={handleCancel} disabled={submitting}>
+              <Button variant="outline" className="w-full" onClick={() => setConfirmCancelOpen(true)} disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Cancel RSVP
               </Button>
             </>
@@ -276,7 +278,7 @@ export default function EventDetail() {
               <div className="rounded-md bg-secondary p-3 text-center text-sm font-medium">
                 You're on the waitlist
               </div>
-              <Button variant="outline" className="w-full" onClick={handleCancel} disabled={submitting}>
+              <Button variant="outline" className="w-full" onClick={() => setConfirmCancelOpen(true)} disabled={submitting}>
                 Leave waitlist
               </Button>
             </>
@@ -296,6 +298,18 @@ export default function EventDetail() {
           </p>
         </aside>
       </div>
+      <ConfirmDialog
+        open={confirmCancelOpen}
+        onOpenChange={setConfirmCancelOpen}
+        title={myRsvp?.status === "waitlisted" ? "Leave the waitlist?" : "Cancel your RSVP?"}
+        description={myRsvp?.status === "waitlisted"
+          ? "You can re-join later if there's still room."
+          : "Your spot will be released and offered to the next waitlisted attendee."}
+        confirmLabel={myRsvp?.status === "waitlisted" ? "Leave waitlist" : "Cancel RSVP"}
+        cancelLabel="Keep it"
+        destructive
+        onConfirm={() => { setConfirmCancelOpen(false); doCancel(); }}
+      />
     </article>
   );
 }

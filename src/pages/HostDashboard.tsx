@@ -18,13 +18,13 @@ import {
 import { EventForm, EventFormValues } from "@/components/events/EventForm";
 import { slugify, randomSuffix } from "@/lib/slug";
 import { MembersPanel } from "@/components/host/MembersPanel";
-import { buildAttendeesCsv } from "@/lib/csv";
+import { buildAttendeesCsv, attendeesFilename } from "@/lib/csv";
 import { ModerationPanel } from "@/components/host/ModerationPanel";
 
 interface EventRow {
   id: string; slug: string; title: string; description: string | null; cover_url: string | null;
   location: string | null; online_url: string | null; starts_at: string; ends_at: string;
-  capacity: number; visibility: "public" | "unlisted"; status: "draft" | "published";
+  capacity: number; visibility: "public" | "unlisted"; status: "draft" | "published" | "unpublished";
   is_paid: boolean; time_zone: string; host_id: string;
 }
 
@@ -45,6 +45,7 @@ export default function HostDashboard() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<EventFormValues> | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<EventRow | null>(null);
+  const [unpublishTarget, setUnpublishTarget] = useState<EventRow | null>(null);
 
   const load = async () => {
     if (!hostId) return;
@@ -66,7 +67,7 @@ export default function HostDashboard() {
       ids.forEach((id) => (counts[id] = { confirmed: 0, waitlist: 0, checked_in: 0 }));
       (rsvps ?? []).forEach((r: any) => {
         if (r.status === "confirmed") counts[r.event_id].confirmed++;
-        else if (r.status === "waitlist") counts[r.event_id].waitlist++;
+        else if (r.status === "waitlisted") counts[r.event_id].waitlist++;
       });
       (cins ?? []).forEach((c: any) => { if (!c.undone) counts[c.event_id].checked_in++; });
       setRsvpCounts(counts);
@@ -83,11 +84,22 @@ export default function HostDashboard() {
   const past = events.filter((e) => new Date(e.ends_at) < now);
 
   const onPublishToggle = async (e: EventRow) => {
-    const next = e.status === "published" ? "draft" : "published";
-    const { error } = await supabase.from("events").update({ status: next }).eq("id", e.id);
+    if (e.status === "published") {
+      setUnpublishTarget(e);
+      return;
+    }
+    const { error } = await supabase.from("events").update({ status: "published" }).eq("id", e.id);
     if (error) return toast.error(error.message);
-    toast.success(next === "published" ? "Published" : "Unpublished");
+    toast.success("Published");
     load();
+  };
+
+  const confirmUnpublish = async () => {
+    if (!unpublishTarget) return;
+    const { error } = await supabase.from("events").update({ status: "draft" }).eq("id", unpublishTarget.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Unpublished"); load(); }
+    setUnpublishTarget(null);
   };
 
   const onDuplicate = async (e: EventRow) => {
@@ -124,9 +136,13 @@ export default function HostDashboard() {
   const openCreate = () => { setEditing(undefined); setFormOpen(true); };
 
   const exportCsv = async (e: EventRow) => {
-    const csv = await buildAttendeesCsv(e.id);
-    downloadCsv(`${e.slug}-attendees.csv`, csv);
-    toast.success("CSV downloaded");
+    try {
+      const csv = await buildAttendeesCsv(e.id);
+      downloadCsv(attendeesFilename(e.title), csv);
+      toast.success("CSV downloaded");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Export failed");
+    }
   };
 
   const downloadCsv = (filename: string, csv: string) => {
@@ -144,7 +160,8 @@ export default function HostDashboard() {
       id: e.id, host_id: e.host_id, title: e.title, description: e.description,
       starts_at: e.starts_at, ends_at: e.ends_at, time_zone: e.time_zone,
       location: e.location, online_url: e.online_url, capacity: e.capacity,
-      cover_url: e.cover_url, visibility: e.visibility, status: e.status, is_paid: e.is_paid,
+      cover_url: e.cover_url, visibility: e.visibility,
+      status: e.status === "published" ? "published" : "draft", is_paid: e.is_paid,
     });
     setFormOpen(true);
   };
@@ -269,6 +286,21 @@ export default function HostDashboard() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!unpublishTarget} onOpenChange={(o) => !o && setUnpublishTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish this event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              It will be hidden from Explore and the public host page. Existing RSVPs are kept.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep published</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnpublish}>Unpublish</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
