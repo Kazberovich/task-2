@@ -160,7 +160,8 @@ export default function HostDashboard() {
       id: e.id, host_id: e.host_id, title: e.title, description: e.description,
       starts_at: e.starts_at, ends_at: e.ends_at, time_zone: e.time_zone,
       location: e.location, online_url: e.online_url, capacity: e.capacity,
-      cover_url: e.cover_url, visibility: e.visibility, status: e.status, is_paid: e.is_paid,
+      cover_url: e.cover_url, visibility: e.visibility,
+      status: e.status === "published" ? "published" : "draft", is_paid: e.is_paid,
     });
     setFormOpen(true);
   };
