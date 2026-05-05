@@ -1,5 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 
+function slugifyForFile(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "event";
+}
+
+export function attendeesFilename(eventTitle: string, date = new Date()) {
+  const d = date.toISOString().slice(0, 10);
+  return `${slugifyForFile(eventTitle)}-rsvps-${d}.csv`;
+}
+
 export async function buildAttendeesCsv(eventId: string): Promise<string> {
   const [{ data: rsvps }, { data: tickets }, { data: cins }] = await Promise.all([
     supabase.from("rsvps").select("id, user_id, status, created_at").eq("event_id", eventId),
@@ -15,16 +24,20 @@ export async function buildAttendeesCsv(eventId: string): Promise<string> {
   const checkByTicket = new Map<string, any>();
   (cins ?? []).forEach((c: any) => { if (!c.undone) checkByTicket.set(c.ticket_id, c); });
 
-  const header = ["Name", "Email", "Status", "Ticket Code", "RSVP At", "Checked In At"];
-  const escape = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const header = ["Name", "Email", "RSVP Status", "Check-in Time", "Ticket Code", "RSVP At"];
+  const escape = (v: any) => {
+    const s = v == null ? "" : String(v);
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
   const lines = [header.join(",")];
   (rsvps ?? []).forEach((r: any) => {
     const p = profMap.get(r.user_id) as any;
     const t = ticketByRsvp.get(r.id);
     const c = t ? checkByTicket.get(t.id) : undefined;
     lines.push([
-      p?.display_name, p?.email, r.status, t?.code, r.created_at, c?.checked_in_at,
+      p?.display_name, p?.email, r.status, c?.checked_in_at, t?.code, r.created_at,
     ].map(escape).join(","));
   });
-  return lines.join("\n");
+  // Use CRLF line endings + UTF-8 BOM for Excel compatibility
+  return "\ufeff" + lines.join("\r\n") + "\r\n";
 }
