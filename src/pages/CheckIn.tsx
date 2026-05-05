@@ -74,7 +74,7 @@ export default function CheckIn() {
 
     const { data: ticket } = await supabase
       .from("tickets")
-      .select("id, code, status, user_id, event_id, profiles:user_id(display_name, email)")
+      .select("id, code, status, user_id, event_id")
       .eq("event_id", eventId)
       .eq("code", raw)
       .maybeSingle();
@@ -105,6 +105,12 @@ export default function CheckIn() {
       return;
     }
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("display_name, email")
+      .eq("id", ticket.user_id)
+      .maybeSingle();
+
     const { data: ins, error } = await supabase
       .from("check_ins")
       .insert({ ticket_id: ticket.id, event_id: eventId, checked_in_by: user!.id })
@@ -117,8 +123,8 @@ export default function CheckIn() {
       return;
     }
 
-    const name = (ticket as any).profiles?.display_name ?? (ticket as any).profiles?.email ?? "Attendee";
-    const email = (ticket as any).profiles?.email ?? "";
+    const name = profile?.display_name ?? profile?.email ?? "Attendee";
+    const email = profile?.email ?? "";
     setFeedback({ kind: "success", message: `${name} checked in` });
     setRecent((r) => [
       { checkInId: ins.id, ticketId: ticket.id, code: ticket.code, name, email, at: ins.checked_in_at, undone: false },
