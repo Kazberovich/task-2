@@ -14,6 +14,8 @@ import MyTickets from "./pages/MyTickets";
 import MyEvents from "./pages/MyEvents";
 import HostDashboard from "./pages/HostDashboard";
 import Auth from "./pages/Auth";
+import InviteAccept from "./pages/InviteAccept";
+import CheckIn from "./pages/CheckIn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
               <Route path="/my/tickets" element={<RequireAuth><MyTickets /></RequireAuth>} />
               <Route path="/my/events" element={<RequireAuth><MyEvents /></RequireAuth>} />
               <Route path="/dashboard" element={<RequireAuth requireHost><HostDashboard /></RequireAuth>} />
+              <Route path="/invite/:token" element={<RequireAuth><InviteAccept /></RequireAuth>} />
+              <Route path="/check-in/:eventId" element={<RequireAuth requireChecker><CheckIn /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
