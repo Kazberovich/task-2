@@ -32,7 +32,6 @@ An events platform with the usual suspects: hosts publishing events, attendees R
 - **Date range picker.** The default shadcn calendar looked nothing like the rest of the redesigned site. Took a focused round of work on `calendar.tsx` and `popover.tsx` to get the pill-shaped range, serif month label, and the little "today" dot.
 - **Empty states.** I kept forgetting them on first pass and the app felt broken when a host had zero events or an attendee had no tickets. Had to do a sweep specifically for empty/error/loading states.
 - **Gallery moderation flow.** Initial version let photos go public immediately. Reworked so uploads sit in a pending queue and only appear after host approval, with a separate "report" path for already-public items.
-- **QR scanning.** I asked where the camera scanner was, then realized the original spec said manual code entry was sufficient. Tickets show a QR for attendees, but check-in is type-the-code. Decided not to add a scanner — would do it later if a real venue asked.
 
 ## Notable decisions
 
