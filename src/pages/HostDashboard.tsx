@@ -24,7 +24,7 @@ import { ModerationPanel } from "@/components/host/ModerationPanel";
 interface EventRow {
   id: string; slug: string; title: string; description: string | null; cover_url: string | null;
   location: string | null; online_url: string | null; starts_at: string; ends_at: string;
-  capacity: number; visibility: "public" | "unlisted"; status: "draft" | "published";
+  capacity: number; visibility: "public" | "unlisted"; status: "draft" | "published" | "unpublished";
   is_paid: boolean; time_zone: string; host_id: string;
 }
 
