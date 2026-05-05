@@ -8,8 +8,14 @@ export function AppLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
-        <div className="container">© {new Date().getFullYear()} Gather — Free community events</div>
+      <footer className="mt-16 border-t border-border py-8 text-sm text-muted-foreground">
+        <div className="container flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="flex items-baseline gap-1">
+            <span className="font-serif text-lg font-semibold text-foreground">Gather</span>
+            <span className="font-serif text-lg leading-none text-accent">.</span>
+          </div>
+          <div>© {new Date().getFullYear()} Free community events for everyone.</div>
+        </div>
       </footer>
     </div>
   );

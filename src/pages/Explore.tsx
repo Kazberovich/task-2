@@ -73,38 +73,50 @@ export default function Explore() {
 
   return (
     <>
-      <section className="border-b border-border" style={{ background: "var(--gradient-hero)" }}>
-        <div className="container py-16 text-center text-primary-foreground">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Find your next community moment
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">
-            Free, local, and welcoming events hosted by people who care.
+      <section className="container pt-10 pb-12 sm:pt-16">
+        <div className="grid items-end gap-8 md:grid-cols-[1.4fr_1fr]">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" /> Community events
+            </span>
+            <h1 className="mt-5 font-serif text-5xl font-medium leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+              Where you find{" "}
+              <span className="italic text-accent">moments</span>{" "}
+              worth showing up for.
+            </h1>
+          </div>
+          <p className="text-base leading-relaxed text-muted-foreground md:text-lg md:max-w-md md:justify-self-end">
+            Gather brings together free, local, and welcoming events — hosted by
+            people who care about the rooms they fill.
           </p>
         </div>
       </section>
 
-      <div className="container py-10">
-        <div className="mb-6 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
+      <div className="container pb-16">
+        <div className="mb-8 grid gap-3 rounded-3xl border border-border bg-card/60 p-3 md:grid-cols-[1fr_1fr_auto_auto]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by title, description, or host"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 rounded-full border-transparent bg-background"
             />
           </div>
           <Input
             placeholder="Filter by location"
             value={locationQuery}
             onChange={(e) => setLocationQuery(e.target.value)}
+            className="rounded-full border-transparent bg-background"
           />
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={cn("justify-start font-normal", !range?.from && "text-muted-foreground")}
+                className={cn(
+                  "justify-start rounded-full border-transparent bg-background font-normal",
+                  !range?.from && "text-muted-foreground"
+                )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {range?.from ? (
@@ -131,7 +143,7 @@ export default function Explore() {
               />
             </PopoverContent>
           </Popover>
-          <div className="flex items-center gap-2 rounded-md border border-input px-3">
+          <div className="flex items-center gap-2 rounded-full bg-background px-4">
             <Switch id="include-past" checked={includePast} onCheckedChange={setIncludePast} />
             <Label htmlFor="include-past" className="cursor-pointer text-sm">
               Include past
@@ -160,9 +172,9 @@ export default function Explore() {
         )}
 
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[16/12] w-full" />
+              <Skeleton key={i} className="aspect-[4/5] w-full rounded-3xl" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -176,7 +188,7 @@ export default function Explore() {
             }
           />
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((e) => (
               <EventCard key={e.id} event={e} />
             ))}
