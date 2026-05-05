@@ -86,6 +86,13 @@ Check-ins are enforced server-side: the same ticket cannot be checked in twice, 
 - **Reports** — any user can report an event or a photo. Reports land in the host's **Moderation** queue, where the host can mark them reviewed or hide the offending item. Hidden items disappear from public views but remain visible to the host.
 - **CSV export** — from the dashboard row, click **CSV** to download a clean attendee export (`event-title-rsvps-YYYY-MM-DD.csv`) with name, email, RSVP status, and check-in time. It opens correctly in Excel and Google Sheets.
 
+### CSV export examples
+
+Two real exports from the app, demonstrating the schema (UTF-8 with BOM, CRLF line endings, columns: `Name, Email, RSVP Status, Check-in Time, Ticket Code, RSVP At`):
+
+- [`poker-eapt-week-rsvps-2026-05-05.csv`](./poker-eapt-week-rsvps-2026-05-05.csv) — single confirmed attendee with a ticket code.
+- [`1-limit-seat-7rd9-attendees.csv`](./1-limit-seat-7rd9-attendees.csv) — capacity-limited event showing both `confirmed` and `waitlisted` rows (waitlisted rows have no ticket code).
+
 ---
 
 ## Quick reference
