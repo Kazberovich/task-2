@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import type { DateRange } from "react-day-picker";
+import { buildAttendeesCsv } from "@/lib/csv";
 
 interface EventRow {
   id: string; slug: string; title: string; starts_at: string; ends_at: string;
@@ -59,27 +60,7 @@ export default function MyEvents() {
   }, [events, hostFilter, search, range]);
 
   const exportCsv = async (e: EventRow) => {
-    const { data } = await supabase
-      .from("rsvps")
-      .select("status, created_at, profiles:user_id(display_name, email), tickets(code, status), check_ins(checked_in_at, undone)")
-      .eq("event_id", e.id);
-    const rows = (data as any[]) ?? [];
-    const header = ["Name", "Email", "Status", "Ticket Code", "RSVP At", "Checked In At"];
-    const csv = [
-      header.join(","),
-      ...rows.map((r) => {
-        const t = r.tickets?.[0];
-        const c = (r.check_ins ?? []).find((x: any) => !x.undone);
-        return [
-          r.profiles?.display_name ?? "",
-          r.profiles?.email ?? "",
-          r.status,
-          t?.code ?? "",
-          r.created_at ?? "",
-          c?.checked_in_at ?? "",
-        ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
-      }),
-    ].join("\n");
+    const csv = await buildAttendeesCsv(e.id);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

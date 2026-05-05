@@ -18,6 +18,7 @@ import {
 import { EventForm, EventFormValues } from "@/components/events/EventForm";
 import { slugify, randomSuffix } from "@/lib/slug";
 import { MembersPanel } from "@/components/host/MembersPanel";
+import { buildAttendeesCsv } from "@/lib/csv";
 
 interface EventRow {
   id: string; slug: string; title: string; description: string | null; cover_url: string | null;
