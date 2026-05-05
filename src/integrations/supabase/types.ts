@@ -14,16 +14,496 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      check_ins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string | null
+          event_id: string
+          id: string
+          ticket_id: string
+          undone: boolean
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id: string
+          id?: string
+          ticket_id: string
+          undone?: boolean
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          event_id?: string
+          id?: string
+          ticket_id?: string
+          undone?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_ins_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          capacity: number
+          cover_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string
+          host_id: string
+          id: string
+          is_paid: boolean
+          location: string | null
+          slug: string
+          starts_at: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at: string
+          visibility: Database["public"]["Enums"]["event_visibility"]
+        }
+        Insert: {
+          capacity?: number
+          cover_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at: string
+          host_id: string
+          id?: string
+          is_paid?: boolean
+          location?: string | null
+          slug: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+        }
+        Update: {
+          capacity?: number
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string
+          host_id?: string
+          id?: string
+          is_paid?: boolean
+          location?: string | null
+          slug?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          event_id: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_uploads: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: Database["public"]["Enums"]["gallery_status"]
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: Database["public"]["Enums"]["gallery_status"]
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: Database["public"]["Enums"]["gallery_status"]
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_uploads_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_invites: {
+        Row: {
+          created_at: string
+          created_by: string
+          email: string
+          expires_at: string
+          host_id: string
+          id: string
+          role: Database["public"]["Enums"]["host_member_role"]
+          status: Database["public"]["Enums"]["invite_status"]
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          email: string
+          expires_at?: string
+          host_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["host_member_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          email?: string
+          expires_at?: string
+          host_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["host_member_role"]
+          status?: Database["public"]["Enums"]["invite_status"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_invites_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_members: {
+        Row: {
+          created_at: string
+          host_id: string
+          id: string
+          role: Database["public"]["Enums"]["host_member_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          host_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["host_member_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          host_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["host_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_members_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hosts: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target_type"]
+        }
+        Relationships: []
+      }
+      rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: Database["public"]["Enums"]["rsvp_status"]
+          updated_at: string
+          user_id: string
+          waitlist_position: number | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+          user_id: string
+          waitlist_position?: number | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+          user_id?: string
+          waitlist_position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          code: string
+          event_id: string
+          id: string
+          issued_at: string
+          rsvp_id: string
+          status: Database["public"]["Enums"]["ticket_status"]
+          user_id: string
+        }
+        Insert: {
+          code?: string
+          event_id: string
+          id?: string
+          issued_at?: string
+          rsvp_id: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          user_id: string
+        }
+        Update: {
+          code?: string
+          event_id?: string
+          id?: string
+          issued_at?: string
+          rsvp_id?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_rsvp_id_fkey"
+            columns: ["rsvp_id"]
+            isOneToOne: true
+            referencedRelation: "rsvps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_check_in_event: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_event_host_manager: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_host_manager: {
+        Args: { _host_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_host_member: {
+        Args: { _host_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "attendee" | "admin"
+      event_status: "draft" | "published" | "unpublished"
+      event_visibility: "public" | "unlisted"
+      gallery_status: "pending" | "approved" | "rejected"
+      host_member_role: "owner" | "manager" | "checker"
+      invite_status: "pending" | "accepted" | "revoked"
+      report_status: "open" | "resolved" | "dismissed"
+      report_target_type: "event" | "gallery_upload"
+      rsvp_status: "confirmed" | "waitlisted" | "cancelled"
+      ticket_status: "valid" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +630,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["attendee", "admin"],
+      event_status: ["draft", "published", "unpublished"],
+      event_visibility: ["public", "unlisted"],
+      gallery_status: ["pending", "approved", "rejected"],
+      host_member_role: ["owner", "manager", "checker"],
+      invite_status: ["pending", "accepted", "revoked"],
+      report_status: ["open", "resolved", "dismissed"],
+      report_target_type: ["event", "gallery_upload"],
+      rsvp_status: ["confirmed", "waitlisted", "cancelled"],
+      ticket_status: ["valid", "cancelled"],
+    },
   },
 } as const
