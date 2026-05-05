@@ -15,8 +15,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const linkBase =
-  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary";
-const active = "bg-secondary text-foreground";
+  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:text-foreground";
+const active = "bg-foreground text-background hover:text-background";
 const inactive = "text-muted-foreground";
 
 export function MainNav() {
@@ -54,20 +54,22 @@ export function MainNav() {
   );
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg" style={{ background: "var(--gradient-primary)" }} />
-          <span className="text-lg font-semibold tracking-tight">Gather</span>
+    <header className="sticky top-0 z-40 w-full bg-background/70 backdrop-blur-md">
+      <div className="container flex h-20 items-center justify-between gap-4">
+        <Link to="/" className="flex items-baseline gap-1">
+          <span className="font-serif text-2xl font-semibold tracking-tight">Gather</span>
+          <span className="font-serif text-2xl text-accent leading-none">.</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">{navLinks}</nav>
+        <nav className="hidden items-center gap-1 rounded-full border border-border bg-card/60 p-1 md:flex">
+          {navLinks}
+        </nav>
 
         <div className="flex items-center gap-2">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="outline" size="icon" className="rounded-full border-border">
                   <UserIcon className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -85,7 +87,7 @@ export function MainNav() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button onClick={() => navigate("/auth")} size="sm">
+            <Button onClick={() => navigate("/auth")} size="sm" className="rounded-full px-5">
               Sign In
             </Button>
           )}
