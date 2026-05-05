@@ -112,8 +112,14 @@ export default function MyEvents() {
               {range?.from ? `${format(range.from, "MMM d")}${range.to ? " – " + format(range.to, "MMM d") : ""}` : "Date range"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto p-0">
-            <Calendar mode="range" selected={range} onSelect={setRange} numberOfMonths={2} />
+          <PopoverContent align="start" className="w-auto p-2">
+            <Calendar
+              mode="range"
+              selected={range}
+              onSelect={setRange}
+              numberOfMonths={2}
+              initialFocus
+            />
           </PopoverContent>
         </Popover>
         {range && <Button variant="ghost" size="sm" onClick={() => setRange(undefined)}>Clear dates</Button>}
