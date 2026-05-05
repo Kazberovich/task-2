@@ -20,14 +20,14 @@ const active = "bg-secondary text-foreground";
 const inactive = "text-muted-foreground";
 
 export function MainNav() {
-  const { user, isHost, signOut } = useAuth();
+  const { user, isHost, isChecker, signOut } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const items = [
     { to: "/", label: "Explore", icon: Compass, show: true },
     { to: "/my/tickets", label: "My Tickets", icon: Ticket, show: !!user },
-    { to: "/my/events", label: "My Events", icon: Calendar, show: !!user },
+    { to: "/my/events", label: "My Events", icon: Calendar, show: !!user && (isHost || isChecker) },
     { to: "/dashboard", label: "Host Dashboard", icon: LayoutDashboard, show: isHost },
   ].filter((i) => i.show);
 

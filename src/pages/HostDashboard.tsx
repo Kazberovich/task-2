@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EventForm, EventFormValues } from "@/components/events/EventForm";
 import { slugify, randomSuffix } from "@/lib/slug";
+import { MembersPanel } from "@/components/host/MembersPanel";
+import { buildAttendeesCsv } from "@/lib/csv";
 
 interface EventRow {
   id: string; slug: string; title: string; description: string | null; cover_url: string | null;
@@ -119,6 +121,23 @@ export default function HostDashboard() {
   };
 
   const openCreate = () => { setEditing(undefined); setFormOpen(true); };
+
+  const exportCsv = async (e: EventRow) => {
+    const csv = await buildAttendeesCsv(e.id);
+    downloadCsv(`${e.slug}-attendees.csv`, csv);
+    toast.success("CSV downloaded");
+  };
+
+  const downloadCsv = (filename: string, csv: string) => {
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const openEdit = (e: EventRow) => {
     setEditing({
       id: e.id, host_id: e.host_id, title: e.title, description: e.description,
@@ -183,8 +202,8 @@ export default function HostDashboard() {
                     {e.status === "published" ? "Unpublish" : "Publish"}
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => onDuplicate(e)}><Copy className="mr-1.5 h-4 w-4" />Duplicate</Button>
-                  <Button size="sm" variant="ghost" onClick={() => toast.info("Check-in coming soon")}><ScanLine className="mr-1.5 h-4 w-4" />Check-in</Button>
-                  <Button size="sm" variant="ghost" onClick={() => toast.info("CSV export coming soon")}><Download className="mr-1.5 h-4 w-4" />CSV</Button>
+                  <Button size="sm" variant="ghost" asChild><Link to={`/check-in/${e.id}`}><ScanLine className="mr-1.5 h-4 w-4" />Check-in</Link></Button>
+                  <Button size="sm" variant="ghost" onClick={() => exportCsv(e)}><Download className="mr-1.5 h-4 w-4" />CSV</Button>
                   <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => tryDelete(e)} title={hasRsvps ? "Has RSVPs — unpublish instead" : "Delete"}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -223,9 +242,13 @@ export default function HostDashboard() {
         <TabsList>
           <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
           <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
         </TabsList>
         <TabsContent value="upcoming" className="mt-6">{renderList(upcoming)}</TabsContent>
         <TabsContent value="past" className="mt-6">{renderList(past)}</TabsContent>
+        <TabsContent value="members" className="mt-6">
+          {hostId && <MembersPanel hostId={hostId} />}
+        </TabsContent>
       </Tabs>
 
       {hostId && (
