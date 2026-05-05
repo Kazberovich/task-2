@@ -482,6 +482,8 @@ export type Database = {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
+      cancel_rsvp: { Args: { _rsvp_id: string }; Returns: undefined }
+      ensure_ticket_for_rsvp: { Args: { _rsvp_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -500,6 +502,25 @@ export type Database = {
       is_host_member: {
         Args: { _host_id: string; _user_id: string }
         Returns: boolean
+      }
+      promote_waitlist: { Args: { _event_id: string }; Returns: number }
+      rsvp_to_event: {
+        Args: { _event_id: string }
+        Returns: {
+          created_at: string
+          event_id: string
+          id: string
+          status: Database["public"]["Enums"]["rsvp_status"]
+          updated_at: string
+          user_id: string
+          waitlist_position: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rsvps"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
