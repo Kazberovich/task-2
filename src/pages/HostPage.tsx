@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { EventCard, EventCardData } from "@/components/events/EventCard";
 
-interface HostRow { id: string; name: string; bio: string | null; banner_url: string | null; avatar_url: string | null; }
+interface HostRow { id: string; name: string; bio: string | null; banner_url: string | null; avatar_url: string | null; contact_email: string | null; }
 
 export default function HostPage() {
   const { slug } = useParams();
@@ -13,7 +13,7 @@ export default function HostPage() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      const { data: h } = await supabase.from("hosts").select("id, name, bio, banner_url, avatar_url").eq("slug", slug).maybeSingle();
+      const { data: h } = await supabase.from("hosts").select("id, name, bio, banner_url, avatar_url, contact_email").eq("slug", slug).maybeSingle();
       setHost(h as any);
       if (h) {
         const { data: ev } = await supabase.from("events")
@@ -31,8 +31,22 @@ export default function HostPage() {
     <>
       <div className="h-48 w-full" style={{ backgroundImage: host.banner_url ? `url(${host.banner_url})` : "var(--gradient-primary)", backgroundSize: "cover" }} />
       <div className="container py-8">
-        <h1 className="text-3xl font-bold">{host.name}</h1>
-        {host.bio && <p className="mt-2 max-w-2xl text-muted-foreground">{host.bio}</p>}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-center gap-4">
+            {host.avatar_url ? (
+              <img src={host.avatar_url} alt={`${host.name} logo`} className="h-20 w-20 -mt-12 rounded-full border-4 border-background object-cover shadow-md" />
+            ) : (
+              <div className="h-20 w-20 -mt-12 rounded-full border-4 border-background bg-secondary shadow-md" />
+            )}
+            <div>
+              <h1 className="text-3xl font-bold">{host.name}</h1>
+              {host.contact_email && (
+                <a href={`mailto:${host.contact_email}`} className="text-sm text-primary hover:underline">{host.contact_email}</a>
+              )}
+            </div>
+          </div>
+        </div>
+        {host.bio && <p className="mt-4 max-w-2xl text-muted-foreground">{host.bio}</p>}
         <h2 className="mb-4 mt-10 text-xl font-semibold">Events</h2>
         {events.length === 0 ? (
           <p className="text-muted-foreground">No public events yet.</p>
