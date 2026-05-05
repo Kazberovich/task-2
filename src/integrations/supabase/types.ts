@@ -68,9 +68,11 @@ export type Database = {
           id: string
           is_paid: boolean
           location: string | null
+          online_url: string | null
           slug: string
           starts_at: string
           status: Database["public"]["Enums"]["event_status"]
+          time_zone: string
           title: string
           updated_at: string
           visibility: Database["public"]["Enums"]["event_visibility"]
@@ -86,9 +88,11 @@ export type Database = {
           id?: string
           is_paid?: boolean
           location?: string | null
+          online_url?: string | null
           slug: string
           starts_at: string
           status?: Database["public"]["Enums"]["event_status"]
+          time_zone?: string
           title: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["event_visibility"]
@@ -104,9 +108,11 @@ export type Database = {
           id?: string
           is_paid?: boolean
           location?: string | null
+          online_url?: string | null
           slug?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["event_status"]
+          time_zone?: string
           title?: string
           updated_at?: string
           visibility?: Database["public"]["Enums"]["event_visibility"]
@@ -272,6 +278,7 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          contact_email: string | null
           created_at: string
           created_by: string
           id: string
@@ -283,6 +290,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          contact_email?: string | null
           created_at?: string
           created_by: string
           id?: string
@@ -294,6 +302,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          contact_email?: string | null
           created_at?: string
           created_by?: string
           id?: string
