@@ -270,10 +270,6 @@ export default function EventDetail() {
                 Leave waitlist
               </Button>
             </>
-          ) : full ? (
-            <Button disabled className="w-full" size="lg">
-              Event full · Join waitlist
-            </Button>
           ) : null}
           {!ended && !myRsvp && !full && (
             <Button onClick={handleRsvp} className="w-full" size="lg" disabled={submitting}>
