@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Calendar, Clock, ExternalLink, Globe, MapPin, Users } from "lucide-react";
 import { format } from "date-fns";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface EventRow {
   id: string;
@@ -32,6 +33,28 @@ export default function EventDetail() {
   const [event, setEvent] = useState<EventRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [goingCount, setGoingCount] = useState<number>(0);
+  const [myRsvp, setMyRsvp] = useState<{ id: string; status: "confirmed" | "waitlisted" | "cancelled" } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const loadCounts = useCallback(async (eventId: string, userId?: string) => {
+    const { count } = await supabase
+      .from("rsvps")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId)
+      .eq("status", "confirmed");
+    setGoingCount(count ?? 0);
+    if (userId) {
+      const { data: r } = await supabase
+        .from("rsvps")
+        .select("id, status")
+        .eq("event_id", eventId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      setMyRsvp((r as any) ?? null);
+    } else {
+      setMyRsvp(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -46,16 +69,11 @@ export default function EventDetail() {
       .then(async ({ data }) => {
         setEvent(data as any);
         if (data) {
-          const { count } = await supabase
-            .from("rsvps")
-            .select("*", { count: "exact", head: true })
-            .eq("event_id", (data as any).id)
-            .eq("status", "confirmed");
-          setGoingCount(count ?? 0);
+          await loadCounts((data as any).id, user?.id);
         }
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, user?.id, loadCounts]);
 
   // Social preview meta (basic, client-side)
   useEffect(() => {
@@ -100,12 +118,33 @@ export default function EventDetail() {
   const remaining = Math.max(0, event.capacity - goingCount);
   const full = !ended && remaining === 0;
 
-  const handleRsvp = () => {
+  const handleRsvp = async () => {
     if (!user) {
       navigate(`/auth?redirect=/events/${slug}`);
       return;
     }
-    toast.info("RSVP coming soon");
+    if (!event) return;
+    setSubmitting(true);
+    const { data, error } = await supabase.rpc("rsvp_to_event", { _event_id: event.id });
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const newStatus = (data as any)?.status;
+    if (newStatus === "confirmed") toast.success("You're going! Ticket added to My Tickets.");
+    else if (newStatus === "waitlisted") toast.success("You're on the waitlist.");
+    await loadCounts(event.id, user.id);
+  };
+
+  const handleCancel = async () => {
+    if (!myRsvp || !event) return;
+    setSubmitting(true);
+    const { error } = await supabase.rpc("cancel_rsvp", { _rsvp_id: myRsvp.id });
+    setSubmitting(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("RSVP cancelled");
+    await loadCounts(event.id, user!.id);
   };
 
   return (
@@ -213,13 +252,37 @@ export default function EventDetail() {
             <div className="rounded-md bg-secondary p-3 text-center text-sm font-medium">
               This event has ended
             </div>
+          ) : myRsvp?.status === "confirmed" ? (
+            <>
+              <div className="rounded-md bg-primary/10 p-3 text-center text-sm font-medium text-primary">
+                You're going 🎉
+              </div>
+              <Button variant="outline" className="w-full" onClick={handleCancel} disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Cancel RSVP
+              </Button>
+            </>
+          ) : myRsvp?.status === "waitlisted" ? (
+            <>
+              <div className="rounded-md bg-secondary p-3 text-center text-sm font-medium">
+                You're on the waitlist
+              </div>
+              <Button variant="outline" className="w-full" onClick={handleCancel} disabled={submitting}>
+                Leave waitlist
+              </Button>
+            </>
           ) : full ? (
             <Button disabled className="w-full" size="lg">
-              Sold out
+              Event full · Join waitlist
             </Button>
-          ) : (
-            <Button onClick={handleRsvp} className="w-full" size="lg">
-              RSVP
+          ) : null}
+          {!ended && !myRsvp && !full && (
+            <Button onClick={handleRsvp} className="w-full" size="lg" disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} RSVP
+            </Button>
+          )}
+          {!ended && !myRsvp && full && (
+            <Button onClick={handleRsvp} className="w-full" variant="secondary" size="lg" disabled={submitting}>
+              Join waitlist
             </Button>
           )}
           <p className="text-xs text-muted-foreground">
