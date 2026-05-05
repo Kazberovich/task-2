@@ -21,10 +21,15 @@ export function MembersPanel({ hostId }: Props) {
 
   const load = async () => {
     const [{ data: m }, { data: i }] = await Promise.all([
-      supabase.from("host_members").select("id, role, user_id, profiles:user_id(display_name, email)").eq("host_id", hostId),
+      supabase.from("host_members").select("id, role, user_id").eq("host_id", hostId),
       supabase.from("host_invites").select("id, email, role, token, status, expires_at, created_at").eq("host_id", hostId).order("created_at", { ascending: false }),
     ]);
-    setMembers((m as any) ?? []);
+    const ids = (m ?? []).map((x: any) => x.user_id);
+    const { data: profs } = ids.length
+      ? await supabase.from("profiles").select("id, display_name, email").in("id", ids)
+      : { data: [] as any[] };
+    const pmap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+    setMembers(((m as any[]) ?? []).map((x) => ({ ...x, profile: pmap.get(x.user_id) })));
     setInvites((i as any) ?? []);
   };
 
@@ -75,8 +80,8 @@ export function MembersPanel({ hostId }: Props) {
         {members.map((m) => (
           <li key={m.id} className="flex items-center justify-between rounded-md border border-border p-3 text-sm">
             <div className="min-w-0">
-              <div className="truncate font-medium">{m.profiles?.display_name ?? m.profiles?.email ?? m.user_id}</div>
-              <div className="truncate text-xs text-muted-foreground">{m.profiles?.email}</div>
+              <div className="truncate font-medium">{m.profile?.display_name ?? m.profile?.email ?? m.user_id}</div>
+              <div className="truncate text-xs text-muted-foreground">{m.profile?.email}</div>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant={m.role === "owner" ? "default" : m.role === "checker" ? "outline" : "secondary"}>
