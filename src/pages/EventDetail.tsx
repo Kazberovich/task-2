@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { FeedbackSection } from "@/components/events/FeedbackSection";
+import { GallerySection } from "@/components/events/GallerySection";
+import { ReportDialog } from "@/components/events/ReportDialog";
 
 interface EventRow {
   id: string;
@@ -224,6 +227,13 @@ export default function EventDetail() {
           {event.description && (
             <div className="mt-6 whitespace-pre-wrap text-foreground">{event.description}</div>
           )}
+
+          <div className="mt-6">
+            <ReportDialog targetType="event" targetId={event.id} />
+          </div>
+
+          <GallerySection eventId={event.id} />
+          <FeedbackSection eventId={event.id} endsAt={event.ends_at} />
 
           {event.hosts && (
             <div className="mt-8 flex items-start gap-3 rounded-lg border border-border p-4">

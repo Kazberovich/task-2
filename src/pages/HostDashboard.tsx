@@ -19,6 +19,7 @@ import { EventForm, EventFormValues } from "@/components/events/EventForm";
 import { slugify, randomSuffix } from "@/lib/slug";
 import { MembersPanel } from "@/components/host/MembersPanel";
 import { buildAttendeesCsv } from "@/lib/csv";
+import { ModerationPanel } from "@/components/host/ModerationPanel";
 
 interface EventRow {
   id: string; slug: string; title: string; description: string | null; cover_url: string | null;
@@ -243,11 +244,15 @@ export default function HostDashboard() {
           <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
           <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="moderation">Moderation</TabsTrigger>
         </TabsList>
         <TabsContent value="upcoming" className="mt-6">{renderList(upcoming)}</TabsContent>
         <TabsContent value="past" className="mt-6">{renderList(past)}</TabsContent>
         <TabsContent value="members" className="mt-6">
           {hostId && <MembersPanel hostId={hostId} />}
+        </TabsContent>
+        <TabsContent value="moderation" className="mt-6">
+          {hostId && <ModerationPanel hostId={hostId} />}
         </TabsContent>
       </Tabs>
 
