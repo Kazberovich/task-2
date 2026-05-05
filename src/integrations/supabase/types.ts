@@ -132,6 +132,7 @@ export type Database = {
           comment: string | null
           created_at: string
           event_id: string
+          hidden: boolean
           id: string
           rating: number
           user_id: string
@@ -140,6 +141,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           event_id: string
+          hidden?: boolean
           id?: string
           rating: number
           user_id: string
@@ -148,6 +150,7 @@ export type Database = {
           comment?: string | null
           created_at?: string
           event_id?: string
+          hidden?: boolean
           id?: string
           rating?: number
           user_id?: string
@@ -518,6 +521,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      hide_reported_target: { Args: { _report_id: string }; Returns: undefined }
       is_event_host_manager: {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean

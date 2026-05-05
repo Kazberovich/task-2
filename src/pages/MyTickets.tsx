@@ -22,7 +22,7 @@ interface Row {
     description: string | null;
     hosts: { name: string } | null;
   } | null;
-  tickets: { id: string; code: string; status: "valid" | "cancelled" }[];
+  tickets: { id: string; code: string; status: "valid" | "cancelled" }[] | { id: string; code: string; status: "valid" | "cancelled" } | null;
 }
 
 export default function MyTickets() {
@@ -60,7 +60,8 @@ export default function MyTickets() {
   const now = new Date();
   const toCard = (r: Row): TicketCardData | null => {
     if (!r.events) return null;
-    const t = r.tickets?.find((x) => x.status === "valid") ?? r.tickets?.[0];
+    const arr = Array.isArray(r.tickets) ? r.tickets : r.tickets ? [r.tickets] : [];
+    const t = arr.find((x) => x.status === "valid") ?? arr[0];
     return {
       id: t?.id ?? r.id,
       code: t?.code ?? "—",
